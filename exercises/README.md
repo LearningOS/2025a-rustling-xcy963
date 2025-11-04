@@ -25,3 +25,9 @@
 | macros                 | §19.6               |
 | clippy                 | §21.4               |
 | conversions            | n/a                 |
+
+- [x] variables
+- [x] functions
+- [x] if
+- [] primitive_types
+- [ ] 
