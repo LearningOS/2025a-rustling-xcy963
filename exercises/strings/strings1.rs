@@ -13,5 +13,5 @@ fn main() {
 }
 
 fn current_favorite_color() -> String {
-    "blue"
+    String::from("blue")//把数据从.data移动到内存堆
 }

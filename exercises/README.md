@@ -29,5 +29,11 @@
 - [x] variables
 - [x] functions
 - [x] if
-- [] primitive_types
-- [ ] 
+- [x] primitive_types
+- [x] vecs
+- [x] move_semantics
+- [x] structs
+- [x] enums
+- [x] strings
+- [x] modules
+- [ ] hashmaps
