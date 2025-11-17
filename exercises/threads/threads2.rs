@@ -12,21 +12,25 @@
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
+use std::sync::Mutex;
 
 struct JobStatus {
     jobs_completed: u32,
 }
 
 fn main() {
-    let status = Arc::new(JobStatus { jobs_completed: 0 });
+    let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
     let mut handles = vec![];
     for _ in 0..10 {
         let status_shared = Arc::clone(&status);
         let handle = thread::spawn(move || {
             thread::sleep(Duration::from_millis(250));
-            // TODO: You must take an action before you update a shared value
-            status_shared.jobs_completed += 1;
+
+            // 在更新共享数据之前必须先 lock
+            let mut status = status_shared.lock().unwrap();
+            status.jobs_completed += 1;//这个时候可以把他当成是正常的变量来访问
         });
+
         handles.push(handle);
     }
     for handle in handles {
@@ -34,6 +38,7 @@ fn main() {
         // TODO: Print the value of the JobStatus.jobs_completed. Did you notice
         // anything interesting in the output? Do you have to 'join' on all the
         // handles?
-        println!("jobs completed {}", ???);
+        let status = status.lock().unwrap();
+        println!("jobs completed {}", status.jobs_completed);
     }
 }

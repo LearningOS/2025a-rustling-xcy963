@@ -44,7 +44,7 @@
 - [x] tests
 - [x] lifetimes
 - [x] iterators
-- [ ] threads
+- [x] threads
 - [ ] smart_pointers
 - [ ] macros
 - [ ] clippy
