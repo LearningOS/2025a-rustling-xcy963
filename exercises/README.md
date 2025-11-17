@@ -36,4 +36,16 @@
 - [x] enums
 - [x] strings
 - [x] modules
-- [ ] hashmaps
+- [x] hashmaps
+- [x] options
+- [x] error_handling
+- [x] generics
+- [x] traits
+- [x] tests
+- [x] lifetimes
+- [x] iterators
+- [ ] threads
+- [ ] smart_pointers
+- [ ] macros
+- [ ] clippy
+- [ ] conversions

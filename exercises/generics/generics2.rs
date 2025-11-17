@@ -8,15 +8,22 @@
 
 // I AM NOT DONE
 
-struct Wrapper {
-    value: u32,
+struct Wrapper<T> {
+    value: T,
 }
 
-impl Wrapper {
-    pub fn new(value: u32) -> Self {
+// 为泛型类型 T 实现方法
+impl<T> Wrapper<T> {
+    pub fn new(value: T) -> Self {
         Wrapper { value }
     }
 }
+
+// impl Wrapper {
+//     pub fn new(value: u32) -> Self {
+//         Wrapper { value }
+//     }
+// }
 
 #[cfg(test)]
 mod tests {

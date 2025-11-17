@@ -17,7 +17,7 @@ mod tests {
 
     #[test]
     fn test_success() {
-        #[cfg(feature = "pass")]
+        #[cfg(feature = "pass")]//这个只是管住一行的
         return;
 
         panic!("no cfg set");

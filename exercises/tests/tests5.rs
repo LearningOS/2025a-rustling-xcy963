@@ -31,8 +31,12 @@ unsafe fn modify_by_address(address: usize) {
     // TODO: Fill your safety notice of the code block below to match your
     // code's behavior and the contract of this function. You may use the
     // comment of the test below as your format reference.
+
+    // SAFETY: `address` is assumed to be a valid pointer to a `u32`
+    // as required by the function's safety contract.
     unsafe {
-        todo!("Your code goes here")
+        let ptr = address as *mut u32;//直接解引用，那么address被释放了也可以执行这个操作
+        *ptr = 0xAABBCCDD;
     }
 }
 
