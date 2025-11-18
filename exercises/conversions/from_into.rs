@@ -44,6 +44,40 @@ impl Default for Person {
 
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        // 1. 空字符串 -> 默认
+        if s.is_empty() {
+            return Person::default();
+        }
+
+        // 2. 按逗号分割
+        let mut iter = s.split(',');
+
+        // 3. 取第一个元素作为 name
+        let name_part = match iter.next() {
+            Some(name) if !name.is_empty() => name.to_string(),
+            _ => return Person::default(), // 没有名字或名字为空
+        };
+
+        // 4. 取第二个元素作为 age 字符串
+        let age_str = match iter.next() {
+            Some(age) if !age.is_empty() => age,
+            _ => return Person::default(), // 没有年龄或年龄为空
+        };
+
+        // 5. 如果还有多余字段（第三个、第四个...），也视为非法 -> 默认
+        if iter.next().is_some() {
+            return Person::default();
+        }
+
+        // 6. 尝试把 age_str 解析成 usize
+        if let Ok(age) = age_str.parse::<usize>() {
+            Person {
+                name: name_part,
+                age,
+            }
+        } else {
+            Person::default()
+        }
     }
 }
 

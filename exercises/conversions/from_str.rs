@@ -50,11 +50,41 @@ enum ParsePersonError {
 // return `Err("my error message".into())`.
 
 impl FromStr for Person {
-    type Err = ParsePersonError;
+    type Err = ParsePersonError;//似乎是约定好的东西???
+
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        // 1. 空字符串
+        if s.is_empty() {
+            return Err(ParsePersonError::Empty);
+        }
+
+        // 2. 按逗号分割
+        let parts: Vec<&str> = s.split(',').collect();
+
+        // 3. 必须刚好是 2 段：name, age
+        if parts.len() != 2 {
+            return Err(ParsePersonError::BadLen);
+        }
+
+        // 4. 取 name，不能为空
+        let name = parts[0];
+        if name.is_empty() {
+            return Err(ParsePersonError::NoName);
+        }
+
+        // 5. 取 age 字符串，尝试 parse 成 usize
+        let age_str = parts[1];
+        let age: usize = age_str
+            .parse::<usize>()
+            .map_err(ParsePersonError::ParseInt)?;
+
+        // 6. 一切正常，返回 Person
+        Ok(Person {
+            name: name.to_string(),
+            age,
+        })
     }
 }
-
 fn main() {
     let p = "Mark,20".parse::<Person>().unwrap();
     println!("{:?}", p);

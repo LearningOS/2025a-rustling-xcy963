@@ -1,81 +1,95 @@
-这个错误是因为需要指定 `Box<dyn ???>` 中的具体类型。让我们分析一下：
+这个题好呀，开始接触 Clippy 了 😎
+我先回答第二个问题：**Clippy 是什么**，再说这道题怎么改。
 
-## 问题分析
+---
 
-代码中有两个可能出错的地方：
-1. `pretend_user_input.parse()` - 可能返回 `ParseIntError`
-2. `PositiveNonzeroInteger::new(x)` - 可能返回 `CreationError`
 
-所以 `main` 函数需要能够处理这两种错误类型。
+## 🔧 这道题的问题出在哪？
 
-## 解决方案
-
-我们需要使用 `Box<dyn error::Error>`，这是一个 trait 对象，可以容纳任何实现了 `Error` trait 的类型：
+你的代码：
 
 ```rust
-use std::error;
-use std::fmt;
-use std::num::ParseIntError;
+use std::f32;
 
-// TODO: update the return type of `main()` to make this compile.
-fn main() -> Result<(), Box<dyn error::Error>> {
-    let pretend_user_input = "42";
-    let x: i64 = pretend_user_input.parse()?;
-    println!("output={:?}", PositiveNonzeroInteger::new(x)?);
-    Ok(())
+fn main() {
+    let pi = 3.14f32;
+    let radius = 5.00f32;
+
+    let area = pi * f32::powi(radius, 2);
+
+    println!(
+        "The area of a circle with radius {:.2} is {:.5}!",
+        radius, area
+    )
 }
-
-// Don't change anything below this line.
-
-#[derive(PartialEq, Debug)]
-struct PositiveNonzeroInteger(u64);
-
-#[derive(PartialEq, Debug)]
-enum CreationError {
-    Negative,
-    Zero,
-}
-
-impl PositiveNonzeroInteger {
-    fn new(value: i64) -> Result<PositiveNonzeroInteger, CreationError> {
-        match value {
-            x if x < 0 => Err(CreationError::Negative),
-            x if x == 0 => Err(CreationError::Zero),
-            x => Ok(PositiveNonzeroInteger(x as u64)),
-        }
-    }
-}
-
-// This is required so that `CreationError` can implement `error::Error`.
-impl fmt::Display for CreationError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let description = match *self {
-            CreationError::Negative => "number is negative",
-            CreationError::Zero => "number is zero",
-        };
-        f.write_str(description)
-    }
-}
-
-impl error::Error for CreationError {}
 ```
 
-## 解释
+Clippy 会对这一句不满意：
 
-**`Box<dyn error::Error>` 的含义：**
+```rust
+let pi = 3.14f32;
+```
 
-- `Box<T>`：一个在堆上分配的指针
-- `dyn error::Error`：任何实现了 `Error` trait 的类型
-- 所以 `Box<dyn error::Error>` 可以容纳任何类型的错误
+因为 `3.14` 是对 π 的**粗糙近似值**，而标准库里已经有更精确的常量：
+`std::f32::consts::PI`
 
-**为什么需要这样：**
+Clippy 有个 lint 叫 **`approx_constant`**，专门抓这种“自己手写一个 3.14/2.718 之类”的情况，它会建议你改成标准库里的常量。
 
-- `ParseIntError` 和 `CreationError` 是不同的类型
-- 但他们都实现了 `Error` trait
-- `Box<dyn error::Error>` 提供了一个统一的接口来处理不同类型的错误
+---
 
-**`?` 操作符的自动转换：**
+## ✅ 一种比较优雅的改法
 
-当使用 `?` 操作符时，Rust 会自动将具体的错误类型转换为 `Box<dyn error::Error>`，这就是为什么我们不需要手动处理错误类型转换的原因。
+你可以这样改：
 
-这种模式在 Rust 中很常见，特别是在应用程序的入口点（如 `main` 函数），因为你可能需要处理来自不同库的各种错误类型。
+```rust
+fn main() {
+    let pi = std::f32::consts::PI;
+    let radius = 5.0f32;
+
+    // 用方法调用也更符合习惯：radius.powi(2)
+    let area = pi * radius.powi(2);
+
+    println!(
+        "The area of a circle with radius {:.2} is {:.5}!",
+        radius, area
+    )
+}
+```
+
+几点说明：
+
+1. `let pi = std::f32::consts::PI;`
+
+   * 使用标准库提供的 **精确 π 常量**，Clippy 就不会再抱怨“approx constant”。
+2. `let radius = 5.0f32;`
+
+   * 写成 `5.0f32` 更常见，看起来也更自然；
+   * 即使你不改这个，一般也不会导致 clippy 报错（但这么写更好看）。
+3. `let area = pi * radius.powi(2);`
+
+   * `radius.powi(2)` 是 f32 的方法，比 `f32::powi(radius, 2)` 更符合 Rust 惯用写法；
+   * 有些配置下 Clippy 还会建议你从函数式写法改成方法调用。
+
+如果你想保留 `use` 也可以这么写：
+
+```rust
+use std::f32::consts::PI;
+
+fn main() {
+    let pi = PI;
+    let radius = 5.0f32;
+
+    let area = pi * radius.powi(2);
+
+    println!(
+        "The area of a circle with radius {:.2} is {:.5}!",
+        radius, area
+    )
+}
+```
+
+这两种在 rustlings 里一般都能通过。
+
+---
+
+如果你跑一下 `rustlings run clippy1` 还是报错，可以把 clippy 的完整输出贴给我，我帮你逐条翻译+分析 👍

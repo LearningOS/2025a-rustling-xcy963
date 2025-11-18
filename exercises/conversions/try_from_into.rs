@@ -10,6 +10,12 @@
 // a hint.
 
 use std::convert::{TryFrom, TryInto};
+//如果没有这个的话每次得
+/*
+impl std::convert::TryFrom<(i16, i16, i16)> for Color {
+    ...
+}
+*/
 
 #[derive(Debug, PartialEq)]
 struct Color {
@@ -38,23 +44,47 @@ enum IntoColorError {
 // that correct RGB color values must be integers in the 0..=255 range.
 
 // Tuple implementation
+// Tuple implementation
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
+
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        // 小工具函数：把 i16 安全地变成 u8
+        fn to_u8(v: i16) -> Result<u8, IntoColorError> {
+            u8::try_from(v).map_err(|_| IntoColorError::IntConversion)
+        }
+
+        let (r, g, b) = tuple;
+
+        Ok(Color {
+            red: to_u8(r)?,
+            green: to_u8(g)?,
+            blue: to_u8(b)?,
+        })
     }
 }
 
 // Array implementation
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
+
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        // 复用 tuple 的实现
+        Color::try_from((arr[0], arr[1], arr[2]))
     }
 }
 
 // Slice implementation
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
+
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        // 先检查长度
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+        // 再复用 tuple 的实现
+        Color::try_from((slice[0], slice[1], slice[2]))
     }
 }
 

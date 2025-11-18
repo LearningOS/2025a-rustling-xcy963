@@ -7,6 +7,7 @@
 
 // I AM NOT DONE
 
+#[macro_use]
 mod macros {
     macro_rules! my_macro {
         () => {
@@ -14,6 +15,8 @@ mod macros {
         };
     }
 }
+
+// use crate::macros::my_macro;
 
 fn main() {
     my_macro!();

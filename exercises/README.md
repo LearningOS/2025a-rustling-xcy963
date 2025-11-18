@@ -45,7 +45,7 @@
 - [x] lifetimes
 - [x] iterators
 - [x] threads
-- [ ] smart_pointers
-- [ ] macros
-- [ ] clippy
+- [x] smart_pointers
+- [x] macros
+- [x] clippy
 - [ ] conversions
