@@ -1,8 +1,7 @@
-/*
+    /*
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,15 +68,80 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+    
+    pub fn merge(mut list_a: LinkedList<T>, mut list_b: LinkedList<T>) -> Self 
+    where
+        T: PartialOrd,
+    {
+        let mut result = LinkedList::new();
+        
+        // 获取两个链表的起始节点
+        let mut a_current = list_a.start;
+        let mut b_current = list_b.start;
+        
+        // 合并两个有序链表
+        while a_current.is_some() && b_current.is_some() {
+            unsafe {
+                let a_val = &(*a_current.unwrap().as_ptr()).val;
+                let b_val = &(*b_current.unwrap().as_ptr()).val;
+                
+                if a_val <= b_val {
+                    // 从list_a取节点
+                    let next = (*a_current.unwrap().as_ptr()).next;
+                    result.add_node(a_current.unwrap());
+                    a_current = next;
+                } else {
+                    // 从list_b取节点
+                    let next = (*b_current.unwrap().as_ptr()).next;
+                    result.add_node(b_current.unwrap());
+                    b_current = next;
+                }
+            }
         }
-	}
+        
+        // 添加剩余节点
+        while a_current.is_some() {
+            unsafe {
+                let next = (*a_current.unwrap().as_ptr()).next;
+                result.add_node(a_current.unwrap());
+                a_current = next;
+            }
+        }
+        
+        while b_current.is_some() {
+            unsafe {
+                let next = (*b_current.unwrap().as_ptr()).next;
+                result.add_node(b_current.unwrap());
+                b_current = next;
+            }
+        }
+        
+        // 防止原链表被drop时释放节点，因为我们已经转移了所有权
+        list_a.start = None;
+        list_a.end = None;
+        list_a.length = 0;
+        list_b.start = None;
+        list_b.end = None;
+        list_b.length = 0;
+        
+        result
+    }
+
+        // 辅助方法：添加现有节点到链表
+    fn add_node(&mut self, node: NonNull<Node<T>>) {
+        unsafe {
+            // 断开原节点的next连接
+            (*node.as_ptr()).next = None;
+        }
+        
+        let node_ptr = Some(node);
+        match self.end {
+            None => self.start = node_ptr,
+            Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = node_ptr },
+        }
+        self.end = node_ptr;
+        self.length += 1;
+    }
 }
 
 impl<T> Display for LinkedList<T>

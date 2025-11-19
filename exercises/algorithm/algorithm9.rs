@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,22 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        // 先把元素放到数组末尾
+        self.items.push(value);
+        self.count += 1;
+
+        // 向上调整（heapify up）
+        let mut idx = self.count;
+        while idx > 1 {
+            let parent = self.parent_idx(idx);
+            // 如果当前结点比父结点“更优先”，就交换
+            if (self.comparator)(&self.items[idx], &self.items[parent]) {
+                self.items.swap(idx, parent);
+                idx = parent;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -45,7 +59,7 @@ where
     }
 
     fn children_present(&self, idx: usize) -> bool {
-        self.left_child_idx(idx) <= self.count
+        self.left_child_idx(idx) <= self.count//小于说明他不是叶子节点
     }
 
     fn left_child_idx(&self, idx: usize) -> usize {
@@ -57,8 +71,20 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+
+        // 如果没有右孩子，只能是左孩子
+        if right > self.count {
+            left
+        } else {
+            // comparator(left, right) 为真 => left 优先级更高
+            if (self.comparator)(&self.items[left], &self.items[right]) {
+                left
+            } else {
+                right
+            }
+        }
     }
 }
 
@@ -84,8 +110,28 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+
+        // 取出堆顶元素：swap_remove(1) 会把最后一个元素挪到 1，再弹出原堆顶
+        let result = self.items.swap_remove(1);
+        self.count -= 1;
+
+        // 向下调整（heapify down）
+        let mut idx = 1;
+        while self.children_present(idx) {
+            let child = self.smallest_child_idx(idx);
+            // 如果孩子比当前结点“更优先”，就交换
+            if (self.comparator)(&self.items[child], &self.items[idx]) {
+                self.items.swap(child, idx);
+                idx = child;
+            } else {
+                break;
+            }
+        }
+
+        Some(result)
     }
 }
 

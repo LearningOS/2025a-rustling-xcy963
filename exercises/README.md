@@ -48,4 +48,4 @@
 - [x] smart_pointers
 - [x] macros
 - [x] clippy
-- [ ] conversions
+- [x] conversions

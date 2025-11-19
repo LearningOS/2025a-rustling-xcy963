@@ -3,9 +3,7 @@
 // Address all the TODOs to make the tests pass!
 //
 // Execute `rustlings hint structs1` or use the `hint` watch subcommand for a
-// hint.
 
-// I AM NOT DONE
 
 struct ColorClassicStruct {//因为下面的范围是0到255 所有直接使用u8
     red: u8,      // 需要添加这些字段
